@@ -1,13 +1,14 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-import openai
 import os
 from pydantic import BaseModel
 from dotenv import load_dotenv
+import openai
 
 load_dotenv()
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+GPT_PROMPT_TEMPLATE = os.getenv("GPT_PROMPT")
 
 app = FastAPI()
 
@@ -19,17 +20,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 🧠 новий клієнт openai
+client = openai.OpenAI(api_key=openai_api_key)
+
 class Message(BaseModel):
     text: str
 
-PROMPT_TEMPLATE = os.getenv("GPT_PROMPT")
-
 @app.post("/chat")
 async def chat_with_gpt(msg: Message):
-    full_prompt = PROMPT_TEMPLATE + "\n" + msg.text
+    full_prompt = GPT_PROMPT_TEMPLATE + "\n" + msg.text
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Ти дружній психологічний GPT-бот."},
