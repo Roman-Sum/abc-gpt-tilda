@@ -40,11 +40,14 @@ START_INSTRUCTION = (
 
 @app.post("/chat")
 async def chat_with_gpt(msg: Message):
-    full_prompt = PROMPT_TEMPLATE + "\n" + msg.text
+    user_input = msg.text.strip().lower()
 
-    # ✅ Виправлено відступ
-    if msg.text.strip().lower() in ["почати", "1", "hi", "hello", "start"]:
+    # 🔹 Якщо це стартове повідомлення — повертаємо інструкцію
+    if user_input in ["почати", "1", "hi", "hello", "start", "як це працює", "2"]:
         return {"reply": START_OPTIONS + "\n\n" + START_INSTRUCTION}
+
+    # 🔹 Інакше — працюємо як звичайно
+    full_prompt = PROMPT_TEMPLATE + "\n" + msg.text
 
     try:
         response = openai.ChatCompletion.create(
