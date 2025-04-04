@@ -23,7 +23,7 @@ app.add_middleware(
 class Message(BaseModel):
     text: str
 
-PROMPT_TEMPLATE = os.getenv("GPT_PROMPT")
+PROMPT_TEMPLATE = os.getenv("GPT_PROMPT", "")
 START_OPTIONS = (
     "🔹 З чого почнемо?\n"
     "1. Почати роботу з думками\n"
@@ -37,16 +37,13 @@ START_INSTRUCTION = (
     "І пам’ятайте: навіть якщо щось не згадається відразу, це абсолютно нормально."
 )
 
-
 @app.post("/chat")
 async def chat_with_gpt(msg: Message):
     user_input = msg.text.strip().lower()
 
-    # 🔹 Якщо це стартове повідомлення — повертаємо інструкцію
     if user_input in ["почати", "1", "hi", "hello", "start", "як це працює", "2"]:
         return {"reply": START_OPTIONS + "\n\n" + START_INSTRUCTION}
 
-    # 🔹 Інакше — працюємо як звичайно
     full_prompt = PROMPT_TEMPLATE + "\n" + msg.text
 
     try:
